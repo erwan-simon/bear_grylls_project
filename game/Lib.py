@@ -36,10 +36,13 @@ class Lib:
 
     def display_players(self):
         for player in self.game.players:
-            pygame.draw.rect(self.screen, player.color, pygame.Rect(player.y * self.square_size, player.x * self.square_size, self.square_size, self.square_size))
+            if player.dead is False:
+                pygame.draw.rect(self.screen, player.color, pygame.Rect(player.y * self.square_size, player.x * self.square_size, self.square_size, self.square_size))
 
     def display_player_vision(self):
         for player in self.game.players:
+            if player.dead is True:
+                continue
             vision = player.take_a_look()
             for square_index in range(len(vision)):
                 pygame.draw.rect(self.screen, (player.color[0] / 2 % 255, player.color[1] / 2 % 255, player.color[2] / 2), pygame.Rect(vision[square_index].y * self.square_size, vision[square_index].x * self.square_size, self.square_size, self.square_size))

@@ -1,21 +1,21 @@
-import sys
-import termios
-import tty
 from game.Lib import Lib
 from random import randint
 from game.Square import Square
 from game.Player import Player
 
+from network.RandomAgent import MyNetwork as random
 from network.KerasAgent import MyNetwork as keras
 from network.PytorchAgent import MyNetwork as pytorch
-from network.RandomAgent import MyNetwork as pytorch
+
+import matplotlib.pyplot as plt
+import numpy as np
 
 # Set options to activate or deactivate the game view, and its speed (50 is good to see what is happening)
 DISPLAY_OPTION = True
 TURN_LATENCY = 0
 NUMBER_OF_PLAYERS = 1
-NUMBER_OF_GAMES = 600
-FOOD_ON_BOARD = 5
+NUMBER_OF_GAMES = 20
+FOOD_ON_BOARD = 15
 
 class Game:
     def __init__(self, game_width=20, game_height=20):
@@ -32,7 +32,10 @@ class Game:
             for x in range(game_width):
                 self.board[-1].append(Square(y, x))
         self.players = []
-        self.players.append(Player(len(self.players), self, MyNetwork))
+        self.players.append(Player(len(self.players), self, keras, "Keras"))
+        self.players.append(Player(len(self.players), self, pytorch, "Pytorch"))
+        self.players.append(Player(len(self.players), self, random, "Random"))
+
         if (DISPLAY_OPTION):
             self.lib = Lib(self)
         self.squares_with_food = []
@@ -51,20 +54,14 @@ class Game:
 
     def restart(self):
         self.game_index += 1
-        best_score = 0
-        best_player = None
-        for player in self.players:
-            if player.score >= best_score:
-                best_score = player.score
-                best_player = player
-            player.respawn()
-        if self.game_best_score < best_score:
-            self.game_best_score = best_score
+
         if self.game_index >= NUMBER_OF_GAMES:
             print(f"{self.game_number} games played. Exiting...")
-            if best_player is not None:
-                best_player.agent.save_agent()
+            self.plot_scores()
             exit(0)
+
+        for player in self.players:
+            player.respawn()
         present_food = 0
         for y in range(len(self.board)):
             for x in range(len(self.board)):
@@ -97,6 +94,17 @@ class Game:
         # restart game if needed
         all_dead = True
         for player in self.players:
-            all_dead = player.dead
+            if player.dead is False:
+                all_dead = False
+                return
         if all_dead is True:
             self.restart()
+
+    def plot_scores(self):
+        sns.set(color_codes=True)
+        scores = []
+        for player in self.players:
+            plt.scatter(np.array((1, self.game_number), np.array([player.scores]), color=player.color))
+        ax = sns.regplot(np.array([array_counter])[0], np.array([array_score])[0], color="b", x_jitter=.1, line_kws={'color':'green'})
+        ax.set(xlabel='games', ylabel='scores')
+        plt.show()

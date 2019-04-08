@@ -1,5 +1,3 @@
-import matplotlib.pyplot as plt
-import seaborn as sns
 import numpy as np
 import math
 import random
@@ -98,9 +96,3 @@ class NetworkWrapper():
 
     def save_agent(self, score):
         torch.save(self.model.state_dict(), f"agent_score_{score}.pth.tar")
-
-    def plot_seaborn(self, array_counter, array_score):
-        sns.set(color_codes=True)
-        ax = sns.regplot(np.array([array_counter])[0], np.array([array_score])[0], color="b", x_jitter=.1, line_kws={'color':'green'})
-        ax.set(xlabel='games', ylabel='score')
-        plt.show()

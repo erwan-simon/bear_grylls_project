@@ -18,7 +18,7 @@ directions = Directions(0, 1, 2, 3)
 
 class Player(object):
 
-    def __init__(self, id, game):
+    def __init__(self, id, game, agent, name="Player"):
         self.id = id
         self.x = randint(0, game.board_width - 1)
         self.y = randint(0, game.board_height - 1)
@@ -26,10 +26,13 @@ class Player(object):
         self.food = FOOD_TO_START
         self.color = colors_combination[id]
         self.dead = False
-        self.agent = NetworkWrapper(game, self)
+        self.agent = NetworkWrapper(game, self, agent)
         self.game = game
         self.just_eat = False
         self.score = 0
+        self.scores = []
+        self.name = name
+        self.survival_time = 0
         self.do_action(directions.NORTH)
 
     def eat(self):
@@ -42,7 +45,7 @@ class Player(object):
 
     def update(self):
         self.just_eat = False
-
+        self.survival_time += 1
         if self.dead:
             return
 
@@ -58,7 +61,7 @@ class Player(object):
         # death
         if self.food <= 0:
             self.dead = True
-            print(f"Player {self.id} died with a score of {self.score}.")
+            print(f"{self.name} ({self.id}) survived {self.survival_time} turns and died with a score of {self.score}.")
 
         # move and learn
         self.agent.request_action()
@@ -80,7 +83,9 @@ class Player(object):
         self.game.remove_player_from_board(self)
         self.game.board[self.y][self.x].players.append(self)
         self.agent.replay_new()
+        self.scores.append(self.score)
         self.score = 0
+        self.survival_time = 0
 
     def do_action(self, action):
         if action is directions.NORTH:
