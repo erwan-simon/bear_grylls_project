@@ -1,4 +1,4 @@
-from network.Network import MyNetwork
+from network.Network2 import MyNetwork
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np

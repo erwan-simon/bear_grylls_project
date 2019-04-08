@@ -20,13 +20,13 @@ class MyNetwork(nn.Module):
         self.drop_layer = nn.Dropout(self.dropout)
         self.criterion = nn.MSELoss()
         self.optimizer = optim.Adam(self.parameters(), lr=self.learning_rate)
-        self.softmax = nn.Softmax()
+        self.softmax = nn.Softmax(dim=1)
 
     def forward(self, x):
         x = self.drop_layer(F.relu(self.fc1(x)))
         x = self.drop_layer(F.relu(self.fc2(x)))
         x = self.drop_layer(F.relu(self.fc3(x)))
-        x = self.softmax(self.fc4(x), dim=4)
+        x = self.softmax(self.fc4(x))
         return x
 
     def predict(self, state):

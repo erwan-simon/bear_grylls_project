@@ -11,9 +11,9 @@ class MyNetwork():
     def __init__(self, inputs=50, outputs=4, learning_rate=0.0005, dropout=0.3):
         self.learning_rate = learning_rate
         self.dropout = dropout
-        self.model = self.network(inputs, outputs)
         self.inputs = inputs
         self.outputs = outputs
+        self.model = self.network()
 
     def network(self, weights=None):
         model = Sequential()
