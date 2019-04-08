@@ -78,19 +78,15 @@ class NetworkWrapper():
         else:
             minibatch = self.memory
         for state, reward_old, action, reward, next_state, done in minibatch:
-            # target = reward
-            # if not done:
-            target = reward - reward_old#+ self.gamma * np.amax(self.model.predict(np.array([next_state]))[0])
+            target = reward - reward_old
             target_f = self.model.predict(state)
-            target_f[0][np.argmax(action)] = target
+            target_f[0][action] = target
             self.model.fit(state, target_f)
 
     def train_short_memory(self, state, reward_old, action, reward, next_state, done):
-        #target = reward
-        #if not done:
-        target = reward - reward_old#  + self.gamma * np.amax(self.model.predict(next_state.reshape((1, 50)))[0])
+        target = reward - reward_old
         target_f = self.model.predict(state)
-        target_f[0][np.argmax(action)] = target
+        target_f[0][action] = target
         self.model.fit(state, target_f)
 
     def end_game(self, scores):
