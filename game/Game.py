@@ -6,6 +6,10 @@ from random import randint
 from game.Square import Square
 from game.Player import Player
 
+from network.KerasAgent import MyNetwork as keras
+from network.PytorchAgent import MyNetwork as pytorch
+from network.RandomAgent import MyNetwork as pytorch
+
 # Set options to activate or deactivate the game view, and its speed (50 is good to see what is happening)
 DISPLAY_OPTION = True
 TURN_LATENCY = 0
@@ -28,8 +32,7 @@ class Game:
             for x in range(game_width):
                 self.board[-1].append(Square(y, x))
         self.players = []
-        for i in range(NUMBER_OF_PLAYERS):
-            self.players.append(Player(len(self.players), self))
+        self.players.append(Player(len(self.players), self, MyNetwork))
         if (DISPLAY_OPTION):
             self.lib = Lib(self)
         self.squares_with_food = []

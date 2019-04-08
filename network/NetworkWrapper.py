@@ -1,4 +1,3 @@
-from network.Network2 import MyNetwork
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
@@ -6,10 +5,9 @@ import math
 import random
 
 class NetworkWrapper():
-    def __init__(self, game, player):
+    def __init__(self, game, player, agent):
         self.reward = 0
-        self.gamma = 0.09
-        self.model = MyNetwork(inputs=50, outputs=4, learning_rate=0.0005, dropout=0.3)
+        self.model = agent(inputs=42, outputs=4, learning_rate=0.0005, dropout=0.5)
         self.memory = []
         self.player = player
         self.game = game
@@ -17,8 +15,8 @@ class NetworkWrapper():
         self.total_moves = 0
 
     def get_state(self):
-        state = np.zeros(50)
         vision = self.player.take_a_look()
+        state = np.zeros(len(vision) + 1)
         for square_index in range(len(vision)):
             state[square_index] = 1 if vision[square_index].food else 0
         state[square_index] = self.player.food
@@ -30,8 +28,13 @@ class NetworkWrapper():
         if self.player.just_eat:
             self.reward = 100
         vision = self.player.take_a_look()
+        food_in_vision = False
         for square in vision:
-            self.reward += 1 * (math.sqrt(50) - math.sqrt(math.pow(square.x - self.player.x, 2) + math.pow(square.y - self.player.y, 2))) if square.food else 0
+            if square.food:
+                food_in_vision = True
+                break
+        if food_in_vision:
+            self.reward += 1 * (math.sqrt(18) - self.player.get_distance_closest_food())
         if self.reward != 0:
             self.game.turn_latency = 300
         else:
@@ -55,7 +58,7 @@ class NetworkWrapper():
         else:
             # predict action based on the old state
             prediction = self.model.predict(state_old)
-            final_move = np.argmax(prediction[0])
+            final_move = np.argmax(prediction)
         #perform new move and get new state
         self.player.do_action(int(final_move))
         state_new = self.get_state()
@@ -80,13 +83,13 @@ class NetworkWrapper():
         for state, reward_old, action, reward, next_state, done in minibatch:
             target = reward - reward_old
             target_f = self.model.predict(state)
-            target_f[0][action] = target
+            target_f[action] = target
             self.model.fit(state, target_f)
 
     def train_short_memory(self, state, reward_old, action, reward, next_state, done):
         target = reward - reward_old
         target_f = self.model.predict(state)
-        target_f[0][action] = target
+        target_f[action] = target
         self.model.fit(state, target_f)
 
     def end_game(self, scores):

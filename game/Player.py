@@ -6,7 +6,7 @@ import numpy as np
 from network.NetworkWrapper import NetworkWrapper
 
 FOOD_TO_START = 1 # food player will have at start
-FOOD_NUTRITION_VALUE = 20 # number of update it takes before a food is consumed
+FOOD_NUTRITION_VALUE = 25 # number of update it takes before a food is consumed
 
 colors_combination = list(product([255, 0], repeat=3)) # make list of colors
 colors_combination.remove((255, 255, 255)) # remove white
@@ -94,8 +94,10 @@ class Player(object):
 
     def take_a_look(self):
         result = []
-        vision_distance = 3
+        vision_distance = 4
+        offset = 0
         for y in range(-vision_distance, vision_distance + 1):
-            for x in range(-vision_distance, vision_distance + 1):
+            for x in range(-offset, offset + 1):
                 result.append(self.game.board[(self.y + y) % self.game.board_height][(self.x + x) % self.game.board_width])
+            offset += 1 if y < 0 else -1
         return result

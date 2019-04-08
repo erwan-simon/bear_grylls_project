@@ -20,7 +20,7 @@ class MyNetwork(nn.Module):
         self.drop_layer = nn.Dropout(self.dropout)
         self.criterion = nn.MSELoss()
         self.optimizer = optim.Adam(self.parameters(), lr=self.learning_rate)
-        self.softmax = nn.Softmax(dim=1)
+        self.softmax = nn.Softmax(dim=0)
 
     def forward(self, x):
         x = self.drop_layer(F.relu(self.fc1(x)))
@@ -31,7 +31,7 @@ class MyNetwork(nn.Module):
 
     def predict(self, state):
         self.eval()
-        prediction = self(torch.from_numpy(state.reshape((1, self.inputs))).float())
+        prediction = self(torch.tensor(state, requires_grad=True).float())
         self.train()
         return prediction.detach().numpy()
 
@@ -39,8 +39,8 @@ class MyNetwork(nn.Module):
         self.train()
         # self.fit(state.reshape((1, self.inputs)), target)
         self.optimizer.zero_grad()
-        output_train = self(torch.from_numpy(state.reshape((1, self.inputs))).float())
-        loss = self.criterion(output_train, torch.from_numpy(target))
+        output_train = self(torch.tensor(state, requires_grad=True).float())
+        loss = self.criterion(output_train, torch.tensor(target, requires_grad=True))
         loss.backward()
         self.optimizer.step()
         self.eval()
