@@ -6,70 +6,104 @@ from game.Player import Player
 from network.RandomAgent import MyNetwork as random
 from network.KerasAgent import MyNetwork as keras
 from network.PytorchAgent import MyNetwork as pytorch
+from network.PytorchAgent import MyNetwork as pytorch2
 
 import matplotlib.pyplot as plt
 import numpy as np
 
 class Game:
-    def __init__(self, board_width=50, board_height=50, display_option=True, general_turn_latency=0, highlight_turn_latency=300, number_of_games=10, food_scarcity=0.005):
+    def __init__(self, id=0,
+                 board_width=50,
+                 board_height=50,
+                 display_option=True,
+                 general_turn_latency=0,
+                 highlight_turn_latency=300,
+                 number_of_games=150,
+                 max_score=1000,
+                 food_offset=6,
+                 max_number_of_stones=12):
         self.board = []
+        self.id = id
+        self.food_offset = food_offset
+        self.current_food_offset = food_offset
+        self.max_number_of_stones = max_number_of_stones
         self.display_option = display_option
         self.general_turn_latency = general_turn_latency
         self.highlight_turn_latency = highlight_turn_latency
-        self.food_scarcity = food_scarcity
         self.board_width = board_width
         self.board_height = board_height
         self.game_best_score = 0
         self.game_index = 0
+        self.max_score = max_score
         self.game_number = number_of_games
         for y in range(board_height):
             self.board.append([])
             for x in range(board_width):
                 self.board[-1].append(Square(y, x))
         self.players = []
-        self.players.append(Player(len(self.players), self, keras, "Keras"))
-        self.players.append(Player(len(self.players), self, pytorch, "Pytorch"))
-        self.players.append(Player(len(self.players), self, random, "Random"))
-
-        self.food_on_board = int(len(self.players) * board_width * board_height * food_scarcity)
+        self.players.append(Player(len(self.players), self, pytorch2(inputs=41, outputs=4, intermediary=50, name="50 - 6 layers")))
+        self.players.append(Player(len(self.players), self, pytorch(inputs=41, outputs=4, intermediary=300, name="300 - 4 layers")))
+        self.players.append(Player(len(self.players), self, random()))
 
         if (self.display_option):
             self.lib = Lib(self)
         self.squares_with_food = []
-        for f in range(self.food_on_board):
-            self.spawn_food()
+        self.squares_with_stone = []
+        self.spawn_food()
+        self.spawn_stones()
         print(f"Starting {self.game_index}th game")
 
+    def where_to_spawn_food_2(self, i, j):
+        for y in range(self.current_food_offset):
+            for x in range(self.current_food_offset):
+                if j + y >= self.board_height or i + x >= self.board_width or self.board[j + y][i + x].food == True:
+                    return -1, -1
+        return randint(i, int(i + self.current_food_offset - 1)), randint(j, int(j + self.current_food_offset - 1))
+
+    def where_to_spawn_food(self):
+        result = []
+        for y in range(0, self.board_height, self.current_food_offset):
+            for x in range(0, self.board_width, self.current_food_offset):
+                res_x, res_y = self.where_to_spawn_food_2(x, y)
+                if res_x != -1 and res_y != -1:
+                    result.append([res_x, res_y])
+        return result
+        # print(len(self.squares_with_food))
+
     def spawn_food(self):
-        nb_alive = 0
+        result = self.where_to_spawn_food()
+        if len(result) != 0:
+            for coo in result:
+                self.board[coo[1]][coo[0]].food = True
+                self.squares_with_food.append(self.board[coo[1]][coo[0]])
+
+    def spawn_stones(self):
+        current_stones_count = len(self.squares_with_stone)
         for player in self.players:
-            if player.dead is False:
-                nb_alive += 1
-        self.food_on_board = int(nb_alive * self.board_width * self.board_height * self.food_scarcity)
-        while len(self.squares_with_food) < self.food_on_board:
+            current_stones_count += player.stones
+        while current_stones_count < self.max_number_of_stones:
             while 1:
                 random_x = randint(0, self.board_width - 1)
                 random_y = randint(0, self.board_height - 1)
-                if self.board[random_y][random_x].food is False:
+                if self.board[random_y][random_x].stone is False:
+                    self.board[random_y][random_x].stone = True
+                    self.squares_with_stone.append(self.board[random_y][random_x])
+                    current_stones_count += 1
                     break
-            self.board[random_y][random_x].food = True
-            self.squares_with_food.append(self.board[random_y][random_x])
 
     def restart(self):
         self.game_index += 1
         for player in self.players:
             player.respawn()
-        present_food = 0
-        for y in range(len(self.board)):
-            for x in range(len(self.board)):
-                if self.board[y][x].food:
-                    present_food += 1
+
         if self.game_index >= self.game_number:
             print(f"{self.game_number} games played. Exiting...")
             self.plot_scores()
+            for player in self.players:
+                print(f"mean score of {player.name}: {sum(player.scores) / len(player.scores)}")
             exit(0)
-        for f in range(present_food, self.food_on_board):
-            self.spawn_food()
+        self.spawn_food()
+        self.spawn_stones()
         print(f"Starting {self.game_index}/{self.game_number}")
 
     def remove_player_from_board(self, player):
@@ -78,6 +112,13 @@ class Game:
                 if player in self.board[y][x].players:
                     self.board[y][x].players.remove(player)
                     return;
+
+    def end_game(self):
+        for player in self.players:
+            player.respawn()
+            print(f"current score of {player.name}: {player.score} | mean score: {sum(player.scores) / len(player.scores)} for {player.death_counter} death")
+        self.plot_scores()
+        exit(0)
 
     def update(self):
         # players
@@ -93,22 +134,30 @@ class Game:
             self.lib = None
 
         # restart game if needed
-        all_dead = True
         for player in self.players:
-            if player.dead is False:
-                all_dead = False
-                return
-        if all_dead is True:
-            self.restart()
+            if player.dead is True:
+                player.respawn()
+            if player.score >= self.max_score:
+                print(f"{player.name} won this game with {player.score} food harvested in {player.survival_time} turns !")
+                self.end_game()
 
     def plot_scores(self):
         scores = []
+        """
+        longest_score = []
+        for player in self.players:
+            if len(player.scores) > len(longest_score):
+                longest_score = player.scores
+        for player in self.players:
+            while len(player.scores) != len(longest_score):
+                player.scores.append(0)
+        """
         for player in self.players:
             color = (player.color[0] / 255, player.color[1] / 255, player.color[2] / 255)
-            plt.plot(range(0, self.game_number), player.scores, label=player.name, color=color)
+            plt.plot(range(0, len(player.scores)), player.scores, label=player.name, color=color)
         plt.ylabel("score")
-        plt.xlabel("game index")
-        plt.legend(title="score evolution")
+        plt.xlabel("death index")
+        plt.legend(title=f"score evolution in game {self.id}")
         ax = plt.gca()
         ax.set_facecolor((0.65, 0.65, 0.65))
         plt.show()

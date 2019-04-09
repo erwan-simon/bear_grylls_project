@@ -3,7 +3,7 @@ import pygame
 class Lib:
     def __init__(self, game):
         pygame.init()
-        self.square_size = 10
+        self.square_size = 15
         pygame.font.init()
         pygame.display.set_caption('MyGame')
         self.screen = pygame.display.set_mode((game.board_width * self.square_size, game.board_height * self.square_size))
@@ -29,10 +29,15 @@ class Lib:
     """
 
     def display_board(self):
+        food_size = 1
+        stone_size = 0.5
+        stone_offset = self.square_size / 2 - stone_size * self.square_size / 2
         for y in range(len(self.game.board)):
             for x in range(len(self.game.board[y])):
                 if (self.game.board[y][x].food):
-                    pygame.draw.rect(self.screen, (255, 0, 0), pygame.Rect(y * self.square_size, x * self.square_size, self.square_size, self.square_size))
+                    pygame.draw.rect(self.screen, (255, 0, 0), pygame.Rect(y * self.square_size, x * self.square_size, self.square_size * food_size, self.square_size * food_size))
+                if (self.game.board[y][x].stone):
+                    pygame.draw.rect(self.screen, (0, 0, 0), pygame.Rect(y * self.square_size + stone_offset, x * self.square_size + stone_offset, self.square_size * stone_size, int(self.square_size * stone_size)))
 
     def display_players(self):
         for player in self.game.players:
@@ -50,8 +55,13 @@ class Lib:
     def update(self):
         self.screen.fill((255, 255, 255))
         self.display_player_vision()
-        self.display_board()
         self.display_players()
+        self.display_board()
         # self.display_ui(game)
         pygame.display.update()
+        for player in self.game.players:
+            if player.agent.reward != 0:
+                self.game.turn_latency = self.game.highlight_turn_latency
+                break
+            self.game.turn_latency = self.game.general_turn_latency
         pygame.time.wait(self.game.turn_latency)

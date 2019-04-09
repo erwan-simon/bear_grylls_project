@@ -7,21 +7,21 @@ import torch.optim as optim
 import math
 
 class MyNetwork(nn.Module):
-    def __init__(self, inputs, outputs, intermediary=120, learning_rate=0.0005, dropout=0.5, name="pytorch"):
+    def __init__(self, inputs, outputs, learning_rate=0.0005, dropout=0):
         super(MyNetwork, self).__init__()
         self.inputs = inputs
         self.outputs = outputs
         self.learning_rate = learning_rate
         self.dropout = dropout
-        self.fc1 = nn.Linear(inputs, intermediary)
-        self.fc2 = nn.Linear(intermediary, intermediary)
-        self.fc3 = nn.Linear(intermediary, intermediary)
-        self.fc4 = nn.Linear(intermediary, outputs)
+        self.fc1 = nn.Linear(inputs, 120)
+        self.fc2 = nn.Linear(120, 120)
+        self.fc3 = nn.Linear(120, 120)
+        self.fc4 = nn.Linear(120, outputs)
         self.drop_layer = nn.Dropout(self.dropout)
         self.criterion = nn.MSELoss()
         self.optimizer = optim.Adam(self.parameters(), lr=self.learning_rate)
         self.softmax = nn.Softmax(dim=0)
-        self.name = name
+        self.name = "drop 0"
 
     def forward(self, x):
         x = self.drop_layer(F.relu(self.fc1(x)))

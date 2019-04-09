@@ -2,8 +2,9 @@ import random
 import numpy as np
 
 class MyNetwork():
-    def __init__(self, inputs=50, outputs=4, learning_rate=0.0005, dropout=0.3):
+    def __init__(self, inputs=50, outputs=4, intermediary=120, learning_rate=0.0005, dropout=0.3, name="random"):
         self.outputs = outputs
+        self.name = name
 
     def predict(self, state):
         result = np.array([0, 0, 0, 0])

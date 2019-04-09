@@ -5,7 +5,8 @@ import random
 class NetworkWrapper():
     def __init__(self, game, player, agent):
         self.reward = 0
-        self.model = agent(inputs=42, outputs=4, learning_rate=0.0005, dropout=0.5)
+        self.model = agent
+        self.name = self.model.name
         self.memory = []
         self.player = player
         self.game = game
@@ -14,11 +15,15 @@ class NetworkWrapper():
 
     def get_state(self):
         vision = self.player.take_a_look()
-        state = np.zeros(len(vision) + 1)
+        state = np.zeros(len(vision))
         for square_index in range(len(vision)):
+            # state[square_index] = np.zeros(3)
+            # np.put(state, [square_index, 0], 1 if vision[square_index].food else 0)
             state[square_index] = 1 if vision[square_index].food else 0
-        state[square_index] = self.player.food
-        return state
+            #np.put(state, [square_index, 1], 1 if vision[square_index].stone else 0)
+            #np.put(state, [square_index, 2], 1 if len(vision[square_index].players) > 0 else 0)
+        # state[square_index] = self.player.food
+        return state#.reshape(3 * len(vision))
 
     def set_reward(self):
         # self.reward = (math.sqrt(math.pow(self.game.board_width, 2) + math.pow(self.game.board_height, 2)) - self.player.get_distance_closest_food())
@@ -33,10 +38,6 @@ class NetworkWrapper():
                 break
         if food_in_vision:
             self.reward += 1 * (math.sqrt(18) - self.player.get_distance_closest_food())
-        if self.reward != 0:
-            self.game.turn_latency = self.game.highlight_turn_latency
-        else:
-            self.game.turn_latency = self.game.general_turn_latency
         return self.reward
 
     def remember(self, state, reward_old, action, reward, next_state, done):

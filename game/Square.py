@@ -3,4 +3,5 @@ class Square:
         self.x = x_loc
         self.y = y_loc
         self.food = False
+        self.stone = False
         self.players = []

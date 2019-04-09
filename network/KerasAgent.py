@@ -8,20 +8,22 @@ from keras.layers.core import Dense, Dropout
 from keras.utils import to_categorical
 
 class MyNetwork():
-    def __init__(self, inputs=50, outputs=4, learning_rate=0.0005, dropout=0.3):
+    def __init__(self, inputs=50, outputs=4, intermediary=120, learning_rate=0.0005, dropout=0.5, name="keras"):
         self.learning_rate = learning_rate
         self.dropout = dropout
         self.inputs = inputs
+        self.intermediary = intermediary
         self.outputs = outputs
         self.model = self.network()
+        self.name = name
 
     def network(self, weights=None):
         model = Sequential()
-        model.add(Dense(output_dim=120, activation='relu', input_dim=self.inputs))
+        model.add(Dense(output_dim=intermediary, activation='relu', input_dim=self.inputs))
         model.add(Dropout(self.dropout))
-        model.add(Dense(output_dim=120, activation='relu'))
+        model.add(Dense(output_dim=intermediary, activation='relu'))
         model.add(Dropout(self.dropout))
-        model.add(Dense(output_dim=120, activation='relu'))
+        model.add(Dense(output_dim=intermediary, activation='relu'))
         model.add(Dropout(self.dropout))
         model.add(Dense(output_dim=self.outputs, activation='softmax'))
         opt = Adam(self.learning_rate)

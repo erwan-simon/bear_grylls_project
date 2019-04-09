@@ -13,8 +13,8 @@ colors_combination.remove((255, 255, 255)) # remove white
 colors_combination.remove((0, 0, 0)) # remove black
 colors_combination.remove((255, 0, 0)) # remove red because it is the color of food
 
-Directions = namedtuple("Directions", ["NORTH", "EAST", "SOUTH", "WEST"])
-directions = Directions(0, 1, 2, 3)
+Actions = namedtuple("Actions", ["NORTH", "EAST", "SOUTH", "WEST", "STEAL", "PICK", "DROP"])
+actions = Actions(0, 1, 2, 3, 4, 5, 6)
 
 class Player(object):
 
@@ -24,6 +24,7 @@ class Player(object):
         self.y = randint(0, game.board_height - 1)
         game.board[self.y][self.x].players.append(self)
         self.food = FOOD_TO_START
+        self.stones = 0
         self.color = colors_combination[id]
         self.dead = False
         self.agent = NetworkWrapper(game, self, agent)
@@ -31,9 +32,10 @@ class Player(object):
         self.just_eat = False
         self.score = 0
         self.scores = []
-        self.name = name
+        self.name = self.agent.name
         self.survival_time = 0
-        self.do_action(directions.NORTH)
+        self.death_counter = 0
+        self.do_action(actions.NORTH)
 
     def eat(self):
         before = self.food
@@ -41,11 +43,30 @@ class Player(object):
         self.food = math.ceil(self.food) # reset consumption of food
         self.just_eat = True
         self.game.squares_with_food.remove(self.game.board[self.y][self.x])
-        self.score += 1
+
+    def drop(self, args=None):
+        pass
+
+    def pick(self, args=None):
+        pass
+
+    def steal(self):
+        debug = f"{self.name} try to steal..."
+        if len(self.game.board[self.y][self.x].players) != 0:
+            debug += " and success !"
+            for player in self.game.board[self.y][self.x].players:
+                if player.stones > 0:
+                    player.stones -= 1
+                    self.stones += 1
+                if player.food > 0:
+                    player.food -= 1
+                    self.eat()
+        print(debug)
 
     def update(self):
         self.just_eat = False
         self.survival_time += 1
+        self.scores.append(self.food)
         if self.dead:
             return
 
@@ -60,8 +81,10 @@ class Player(object):
 
         # death
         if self.food <= 0:
+            # print(f"{self.name} ({self.id}) survived {self.survival_time} turns and died with a score of {self.score}.")
             self.dead = True
-            print(f"{self.name} ({self.id}) survived {self.survival_time} turns and died with a score of {self.score}.")
+            self.score = 0
+            self.death_counter += 1
 
         # move and learn
         self.agent.request_action()
@@ -78,24 +101,29 @@ class Player(object):
     def respawn(self):
         self.dead = False
         self.food = FOOD_TO_START
+        self.stones = 0
         self.x = randint(0, self.game.board_width - 1)
         self.y = randint(0, self.game.board_height - 1)
         self.game.remove_player_from_board(self)
         self.game.board[self.y][self.x].players.append(self)
         self.agent.replay_new()
-        self.scores.append(self.score)
-        self.score = 0
         self.survival_time = 0
 
-    def do_action(self, action):
-        if action is directions.NORTH:
+    def do_action(self, action, args=None):
+        if action is actions.NORTH:
             self.y = (self.y + 1) % self.game.board_height
-        elif action is directions.SOUTH:
+        elif action is actions.SOUTH:
             self.y = (self.y - 1) % self.game.board_height
-        elif action is directions.EAST:
+        elif action is actions.EAST:
             self.x = (self.x + 1) % self.game.board_width
-        elif action is directions.WEST:
+        elif action is actions.WEST:
             self.x = (self.x - 1) % self.game.board_width
+        elif action is actions.STEAL:
+            self.steal()
+        elif action is actions.PICK:
+            self.pick(args)
+        elif action is actions.DROP:
+            self.drop(args)
 
     def take_a_look(self):
         result = []
