@@ -34,23 +34,23 @@ class NetworkWrapper():
         if food_in_vision:
             self.reward += 1 * (math.sqrt(18) - self.player.get_distance_closest_food())
         if self.reward != 0:
-            self.game.turn_latency = 300
+            self.game.turn_latency = self.game.highlight_turn_latency
         else:
-            self.game.turn_latency = 0
+            self.game.turn_latency = self.game.general_turn_latency
         return self.reward
 
     def remember(self, state, reward_old, action, reward, next_state, done):
         self.memory.append((state, reward_old, action, reward, next_state, done))
 
     def request_action(self):
-        self.epsilon = 500 - self.game.game_index
+        self.epsilon = self.game.game_number / 1.8 - self.game.game_index
 
         #get old state
         state_old = self.get_state()
         reward_old = self.set_reward()
         self.total_moves += 1
         #perform random actions based on agent.epsilon, or choose the action
-        if random.randint(0, 1100) < self.epsilon:
+        if random.randint(0, int(self.game.game_number * 1.3)) < self.epsilon:
             final_move = random.randint(0, 3)
             self.random_moves += 1
         else:
