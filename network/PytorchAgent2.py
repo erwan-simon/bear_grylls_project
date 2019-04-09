@@ -13,12 +13,14 @@ class MyNetwork(nn.Module):
         self.outputs = outputs
         self.learning_rate = learning_rate
         self.dropout = dropout
+        self.intermediary = intermediary
         self.fc1 = nn.Linear(inputs, intermediary)
         self.fc2 = nn.Linear(intermediary, intermediary)
         self.fc3 = nn.Linear(intermediary, intermediary)
         self.fc4 = nn.Linear(intermediary, intermediary)
         self.fc5 = nn.Linear(intermediary, intermediary)
         self.fc6 = nn.Linear(intermediary, outputs)
+        self.number_of_layers = 6
         self.drop_layer = nn.Dropout(self.dropout)
         self.criterion = nn.MSELoss()
         self.optimizer = optim.Adam(self.parameters(), lr=self.learning_rate)

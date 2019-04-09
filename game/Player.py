@@ -35,6 +35,7 @@ class Player(object):
         self.name = self.agent.name
         self.survival_time = 0
         self.death_counter = 0
+        self.game.logs_management(f"agent {self.id} named {self.name} has {self.agent.model.inputs} inputs, {self.agent.model.outputs} outputs, {self.agent.model.intermediary} intermediary, {self.agent.model.number_of_layers} layers, {self.agent.model.dropout} dropout, {self.agent.model.learning_rate} learning rate ")
         self.do_action(actions.NORTH)
 
     def eat(self):
@@ -61,7 +62,7 @@ class Player(object):
                 if player.food > 0:
                     player.food -= 1
                     self.eat()
-        print(debug)
+        self.game.logs_management(debug)
 
     def update(self):
         self.just_eat = False

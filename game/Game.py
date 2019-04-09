@@ -6,10 +6,11 @@ from game.Player import Player
 from network.RandomAgent import MyNetwork as random
 from network.KerasAgent import MyNetwork as keras
 from network.PytorchAgent import MyNetwork as pytorch
-from network.PytorchAgent import MyNetwork as pytorch2
+from network.PytorchAgent2 import MyNetwork as pytorch2
 
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 
 class Game:
     def __init__(self, id=0,
@@ -21,37 +22,53 @@ class Game:
                  number_of_games=150,
                  max_score=1000,
                  food_offset=6,
-                 max_number_of_stones=12):
-        self.board = []
+                 max_number_of_stones=12,
+                 save_logs=True,
+                 verbose=True,
+                 display_plot=False):
+        # settings
         self.id = id
+        self.verbose = verbose
+        self.display_plot = display_plot
+        self.save_logs = save_logs
+        self.logs = []
+
+        # board settings
+        self.board = []
         self.food_offset = food_offset
         self.current_food_offset = food_offset
         self.max_number_of_stones = max_number_of_stones
-        self.display_option = display_option
-        self.general_turn_latency = general_turn_latency
-        self.highlight_turn_latency = highlight_turn_latency
         self.board_width = board_width
         self.board_height = board_height
-        self.game_best_score = 0
-        self.game_index = 0
-        self.max_score = max_score
-        self.game_number = number_of_games
         for y in range(board_height):
             self.board.append([])
             for x in range(board_width):
                 self.board[-1].append(Square(y, x))
+
+        # players
         self.players = []
         self.players.append(Player(len(self.players), self, pytorch2(inputs=41, outputs=4, intermediary=50, name="50 - 6 layers")))
         self.players.append(Player(len(self.players), self, pytorch(inputs=41, outputs=4, intermediary=300, name="300 - 4 layers")))
         self.players.append(Player(len(self.players), self, random()))
 
-        if (self.display_option):
-            self.lib = Lib(self)
+        # food and stones initialisation
         self.squares_with_food = []
         self.squares_with_stone = []
         self.spawn_food()
         self.spawn_stones()
-        print(f"Starting {self.game_index}th game")
+
+        # others
+        self.game_best_score = 0
+        self.game_index = 0
+        self.max_score = max_score
+        self.game_number = number_of_games
+
+        # lib settings
+        self.display_option = display_option
+        self.general_turn_latency = general_turn_latency
+        self.highlight_turn_latency = highlight_turn_latency
+        if (self.display_option):
+            self.lib = Lib(self)
 
     def where_to_spawn_food_2(self, i, j):
         for y in range(self.current_food_offset):
@@ -97,14 +114,14 @@ class Game:
             player.respawn()
 
         if self.game_index >= self.game_number:
-            print(f"{self.game_number} games played. Exiting...")
+            self.logs_management(f"{self.game_number} games played. Exiting...")
             self.plot_scores()
             for player in self.players:
-                print(f"mean score of {player.name}: {sum(player.scores) / len(player.scores)}")
+                self.logs_management(f"mean score of {player.name}: {sum(player.scores) / len(player.scores)}")
             exit(0)
         self.spawn_food()
         self.spawn_stones()
-        print(f"Starting {self.game_index}/{self.game_number}")
+        self.logs_management(f"Starting {self.game_index}/{self.game_number}")
 
     def remove_player_from_board(self, player):
         for y in range(len(self.board)):
@@ -116,7 +133,16 @@ class Game:
     def end_game(self):
         for player in self.players:
             player.respawn()
-            print(f"current score of {player.name}: {player.score} | mean score: {sum(player.scores) / len(player.scores)} for {player.death_counter} death")
+            self.logs_management(f"current score of {player.name}: {player.score} | mean score: {sum(player.scores) / len(player.scores)} for {player.death_counter} death")
+        if self.save_logs:
+            directory = f"./logs/Game {self.id}"
+            if not os.path.isdir(directory):
+                os.makedirs(directory)
+            f = open(f"./logs/Game {self.id}/logs.txt", "w+")
+            for log in self.logs:
+                f.write(log)
+            f.close()
+            print(f"Saved logs in {directory}.")
         self.plot_scores()
         exit(0)
 
@@ -137,21 +163,17 @@ class Game:
         for player in self.players:
             if player.dead is True:
                 player.respawn()
-            if player.score >= self.max_score:
-                print(f"{player.name} won this game with {player.score} food harvested in {player.survival_time} turns !")
+            if player.food >= self.max_score:
+                self.logs_management(f"{player.name} won this game with {player.score} food harvested in {player.survival_time} turns !")
                 self.end_game()
+
+    def logs_management(self, logs):
+        if self.verbose:
+            print(logs)
+        self.logs.append(logs)
 
     def plot_scores(self):
         scores = []
-        """
-        longest_score = []
-        for player in self.players:
-            if len(player.scores) > len(longest_score):
-                longest_score = player.scores
-        for player in self.players:
-            while len(player.scores) != len(longest_score):
-                player.scores.append(0)
-        """
         for player in self.players:
             color = (player.color[0] / 255, player.color[1] / 255, player.color[2] / 255)
             plt.plot(range(0, len(player.scores)), player.scores, label=player.name, color=color)
@@ -160,4 +182,7 @@ class Game:
         plt.legend(title=f"score evolution in game {self.id}")
         ax = plt.gca()
         ax.set_facecolor((0.65, 0.65, 0.65))
-        plt.show()
+        if self.display_plot:
+            plt.show()
+        if self.save_logs:
+            plt.savefig(f'./logs/Game {self.id}/figure.png')
