@@ -7,23 +7,23 @@ import torch.optim as optim
 import math
 
 class MyNetwork(nn.Module):
-    def __init__(self, inputs, outputs, intermediary=120, learning_rate=0.0005, dropout=0.5, name="pytorch"):
+    def __init__(self, inputs, outputs, model=None):
         super(MyNetwork, self).__init__()
         self.inputs = inputs
         self.outputs = outputs
-        self.learning_rate = learning_rate
-        self.dropout = dropout
-        self.intermediary = intermediary
+        intermediary = 300
         self.fc1 = nn.Linear(inputs, intermediary)
         self.fc2 = nn.Linear(intermediary, intermediary)
         self.fc3 = nn.Linear(intermediary, intermediary)
         self.fc4 = nn.Linear(intermediary, outputs)
-        self.number_of_layers = 4
-        self.drop_layer = nn.Dropout(self.dropout)
+        if model is not None:
+            self.load_state_dict(torch.load(model))
+        self.drop_layer = nn.Dropout(0.5)
         self.criterion = nn.MSELoss()
-        self.optimizer = optim.Adam(self.parameters(), lr=self.learning_rate)
+        self.optimizer = optim.SGD(self.parameters(), lr=0.0005, momentum=.9)
         self.softmax = nn.Softmax(dim=0)
-        self.name = name
+        self.configuration_string = f"pytorch model with {self.inputs} inputs, {self.outputs} outputs, {intermediary} intermediary, 4 layers, dropout of 0.5, SGD optimizer, MSELoss and softmax"
+
 
     def forward(self, x):
         x = self.drop_layer(F.relu(self.fc1(x)))
@@ -48,5 +48,5 @@ class MyNetwork(nn.Module):
         self.optimizer.step()
         self.eval()
 
-    def save_model(self):
-        torch.save(self.model.state_dict(), f"agent.pth.tar")
+    def save_model(self, path):
+        torch.save(self.state_dict(), f"{path}/agent_{self.name}.pth.tar")

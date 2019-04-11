@@ -3,13 +3,13 @@ import math
 import random
 
 class NetworkWrapper():
-    def __init__(self, game, player, agent):
-        self.reward = 0
+    def __init__(self, agent, history_size=10):
+        self.history_size = history_size
         self.model = agent
-        self.name = self.model.name
-        self.memory = []
-        self.player = player
-        self.game = game
+        self.player = None
+        self.game = None
+        len_vision = 41 # hard codded, not pretty but anyway
+        self.memory = [([0 for i in range(len_vision)], [0 for i in range(self.model.outputs)], 0)]
         self.random_moves = 0
         self.total_moves = 0
 
@@ -25,11 +25,14 @@ class NetworkWrapper():
         # state[square_index] = self.player.food
         return state#.reshape(3 * len(vision))
 
-    def set_reward(self):
+    def get_reward(self):
         # self.reward = (math.sqrt(math.pow(self.game.board_width, 2) + math.pow(self.game.board_height, 2)) - self.player.get_distance_closest_food())
-        self.reward = 0
-        if self.player.just_eat:
-            self.reward = 100
+        reward = 0
+        if self.player.dead:
+            reward = -100
+        elif self.player.just_eat:
+            reward = 100
+        """
         vision = self.player.take_a_look()
         food_in_vision = False
         for square in vision:
@@ -37,63 +40,60 @@ class NetworkWrapper():
                 food_in_vision = True
                 break
         if food_in_vision:
-            self.reward += 1 * (math.sqrt(18) - self.player.get_distance_closest_food())
-        return self.reward
-
-    def remember(self, state, reward_old, action, reward, next_state, done):
-        self.memory.append((state, reward_old, action, reward, next_state, done))
+            reward += 1 * (math.sqrt(18) - self.player.get_distance_closest_food())
+        """
+        return reward
 
     def request_action(self):
         self.epsilon = self.game.game_number / 1.8 - self.game.game_index
 
-        #get old state
-        state_old = self.get_state()
-        reward_old = self.set_reward()
         self.total_moves += 1
         #perform random actions based on agent.epsilon, or choose the action
         if random.randint(0, int(self.game.game_number * 1.3)) < self.epsilon:
-            final_move = random.randint(0, 3)
+            action = random.randint(0, 3)
             self.random_moves += 1
         else:
             # predict action based on the old state
-            prediction = self.model.predict(state_old)
-            final_move = np.argmax(prediction)
+            prediction = self.model.predict(self.memory)
+            action = np.argmax(prediction)
         #perform new move and get new state
-        self.player.do_action(int(final_move))
-        state_new = self.get_state()
+        self.player.do_action(int(action))
+        state = self.get_state()
 
         #set treward for the new state
-        reward = self.set_reward()
-
-        #train short memory base on the new action and state
-        self.train_short_memory(state_old, reward_old, final_move, reward, state_new, self.player.dead)
+        reward = self.get_reward()
 
         # store the new data into a long term memory
-        self.remember(state_old, reward_old, final_move, reward, state_new, self.player.dead)
+        self.remember(state, action, reward)
+
+        #train short memory base on the new action and state
+        self.train_short_memory()
+
 
     def replay_new(self):
         # print(f'random moves : {100 * float(self.random_moves) / self.total_moves}')
         self.random_moves = 0
         self.total_moves = 0
         if len(self.memory) > 1000:
-            minibatch = random.sample(self.memory, 1000)
+            minibatch_index = random.sample(range(1, len(self.memory)), 1000)
         else:
-            minibatch = self.memory
-        for state, reward_old, action, reward, next_state, done in minibatch:
-            target = reward - reward_old
-            target_f = self.model.predict(state)
-            target_f[action] = target
-            self.model.fit(state, target_f)
+            minibatch_index = range(1, len(self.memory))
+        for i in minibatch_index:
+            # target is last action done
+            # print(f"array = {self.memory[np.amax([i - self.history_size, 0]):i]} | i = {i} | left = {np.amax([i - self.history_size, 0])} | minibatch = {minibatch_index}")
+            self.model.fit(self.memory[np.amax([i - self.history_size, 0]):i], self.memory[i][1])
 
-    def train_short_memory(self, state, reward_old, action, reward, next_state, done):
-        target = reward - reward_old
-        target_f = self.model.predict(state)
-        target_f[action] = target
-        self.model.fit(state, target_f)
+    def train_short_memory(self):
+        # target is last action done
+        self.model.fit(self.memory[-self.history_size:-1], self.memory[-1][1])
+
+
+    def remember(self, state, action, reward):
+        # action is an int but we want it to be a one hot vector
+        one_hot_action = [0 for i in range(self.model.outputs)]
+        one_hot_action[action] = 1
+        self.memory.append((state, one_hot_action, reward))
 
     def end_game(self, scores):
         self.save_agent()
         plot_seaborn()
-
-    def save_agent(self, score):
-        torch.save(self.model.state_dict(), f"agent_score_{score}.pth.tar")

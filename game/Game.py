@@ -2,12 +2,8 @@ from game.Lib import Lib
 from random import randint
 from game.Square import Square
 from game.Player import Player
-
-from network.RandomAgent import MyNetwork as random
-from network.KerasAgent import MyNetwork as keras
-from network.PytorchAgent import MyNetwork as pytorch
-from network.PytorchAgent2 import MyNetwork as pytorch2
-
+import matplotlib as mpl
+mpl.use('TkAgg')
 import matplotlib.pyplot as plt
 import numpy as np
 import os
@@ -21,17 +17,28 @@ class Game:
                  highlight_turn_latency=300,
                  number_of_games=150,
                  max_score=1000,
+                 food_to_start=1,
+                 food_nutrition_value=25,
                  food_offset=6,
                  max_number_of_stones=12,
                  save_logs=True,
+                 save_models=True,
                  verbose=True,
-                 display_plot=False):
+                 display_plot=False,
+                 players=[],
+                 max_turns=10000):
         # settings
         self.id = id
         self.verbose = verbose
         self.display_plot = display_plot
         self.save_logs = save_logs
+        self.save_models = save_models
+        self.max_turns = max_turns
         self.logs = []
+        if self.save_logs or self.save_models:
+            directory = f"./logs/Game_{self.id}"
+            if not os.path.isdir(directory):
+                os.makedirs(directory)
 
         # board settings
         self.board = []
@@ -46,10 +53,9 @@ class Game:
                 self.board[-1].append(Square(y, x))
 
         # players
-        self.players = []
-        self.players.append(Player(len(self.players), self, pytorch2(inputs=41, outputs=4, intermediary=50, name="50 - 6 layers")))
-        self.players.append(Player(len(self.players), self, pytorch(inputs=41, outputs=4, intermediary=300, name="300 - 4 layers")))
-        self.players.append(Player(len(self.players), self, random()))
+        self.food_nutrition_value = food_nutrition_value
+        self.food_to_start = food_to_start
+        self.players = players
 
         # food and stones initialisation
         self.squares_with_food = []
@@ -67,9 +73,16 @@ class Game:
         self.display_option = display_option
         self.general_turn_latency = general_turn_latency
         self.highlight_turn_latency = highlight_turn_latency
+        self.turn_latency = general_turn_latency
         if (self.display_option):
             self.lib = Lib(self)
+        self.logs_management(f"Game {self.id} settings : food offset = {self.food_offset}, food nutrition value = {self.food_nutrition_value}, food to start = {self.food_to_start}, max number of stones = {self.max_number_of_stones}, board width = {self.board_width}, board height = {self.board_height}")
 
+    """
+    # this is a way to make sure that food spawns regularly on the board
+    # problem is that I think it could be seen as a sort of bias given that AI
+    # could develop a sort of "lazy behaviour" because it knows that food will
+    # spawn around after it ate one.
     def where_to_spawn_food_2(self, i, j):
         for y in range(self.current_food_offset):
             for x in range(self.current_food_offset):
@@ -86,13 +99,17 @@ class Game:
                     result.append([res_x, res_y])
         return result
         # print(len(self.squares_with_food))
+    """
 
     def spawn_food(self):
-        result = self.where_to_spawn_food()
-        if len(result) != 0:
-            for coo in result:
-                self.board[coo[1]][coo[0]].food = True
-                self.squares_with_food.append(self.board[coo[1]][coo[0]])
+        while len(self.squares_with_food) < self.food_offset:
+            while 1:
+                random_x = randint(0, self.board_width - 1)
+                random_y = randint(0, self.board_height - 1)
+                if self.board[random_y][random_x].food is False:
+                    self.board[random_y][random_x].food = True
+                    self.squares_with_food.append(self.board[random_y][random_x])
+                    break
 
     def spawn_stones(self):
         current_stones_count = len(self.squares_with_stone)
@@ -133,20 +150,23 @@ class Game:
     def end_game(self):
         for player in self.players:
             player.respawn()
-            self.logs_management(f"current score of {player.name}: {player.score} | mean score: {sum(player.scores) / len(player.scores)} for {player.death_counter} death")
+            self.logs_management(f"current score of {player.name}: {player.scores[-1]} | mean score: {sum(player.scores) / len(player.scores)} for {player.death_counter} death")
+            if self.save_models:
+                player.agent.model.save_model(f"./logs/Game_{self.id}/agent_{self.player.name}.pth.tar")
         if self.save_logs:
-            directory = f"./logs/Game {self.id}"
-            if not os.path.isdir(directory):
-                os.makedirs(directory)
-            f = open(f"./logs/Game {self.id}/logs.txt", "w+")
+            f = open(f"./logs/Game_{self.id}/logs.txt", "w+")
             for log in self.logs:
                 f.write(log)
             f.close()
+            directory = f"./logs/Game_{self.id}"
             print(f"Saved logs in {directory}.")
         self.plot_scores()
-        exit(0)
 
     def update(self):
+        """
+        if len(self.players[0].scores) % 1000 == 0: # every 1000 turns, change situation
+            self.current_food_offset = 10 if self.current_food_offset == 5 else 5
+        """
         # players
         for player in self.players:
             player.update()
@@ -159,13 +179,19 @@ class Game:
         elif hasattr(self, 'lib') is True:
             self.lib = None
 
+        if len(self.players[0].scores) >= self.max_turns:
+            self.logs_management(f"Max number of turn reached ({self.max_turns} turns). Exiting...")
+            self.end_game()
+
         # restart game if needed
         for player in self.players:
             if player.dead is True:
                 player.respawn()
             if player.food >= self.max_score:
-                self.logs_management(f"{player.name} won this game with {player.score} food harvested in {player.survival_time} turns !")
+                self.logs_management(f"{player.name} won game {self.id} with {player.food} food harvested in {player.survival_time} turns !")
                 self.end_game()
+                return False
+        return True
 
     def logs_management(self, logs):
         if self.verbose:
@@ -185,4 +211,5 @@ class Game:
         if self.display_plot:
             plt.show()
         if self.save_logs:
-            plt.savefig(f'./logs/Game {self.id}/figure.png')
+            # plt.figure(figsize=(655,655))
+            plt.savefig(f'./logs/Game_{self.id}/figure.png')

@@ -3,14 +3,10 @@ from itertools import product, islice
 from collections import namedtuple
 import math
 import numpy as np
-from network.NetworkWrapper import NetworkWrapper
-
-FOOD_TO_START = 1 # food player will have at start
-FOOD_NUTRITION_VALUE = 25 # number of update it takes before a food is consumed
 
 colors_combination = list(product([255, 0], repeat=3)) # make list of colors
 colors_combination.remove((255, 255, 255)) # remove white
-colors_combination.remove((0, 0, 0)) # remove black
+colors_combination.remove((0, 0, 0)) # remove black because it is color of stones
 colors_combination.remove((255, 0, 0)) # remove red because it is the color of food
 
 Actions = namedtuple("Actions", ["NORTH", "EAST", "SOUTH", "WEST", "STEAL", "PICK", "DROP"])
@@ -18,24 +14,25 @@ actions = Actions(0, 1, 2, 3, 4, 5, 6)
 
 class Player(object):
 
-    def __init__(self, id, game, agent, name="Player"):
+    def __init__(self, id, game, network_wrapper, name="Player"):
         self.id = id
         self.x = randint(0, game.board_width - 1)
         self.y = randint(0, game.board_height - 1)
         game.board[self.y][self.x].players.append(self)
-        self.food = FOOD_TO_START
+        self.food = 1
         self.stones = 0
         self.color = colors_combination[id]
         self.dead = False
-        self.agent = NetworkWrapper(game, self, agent)
+        self.agent = network_wrapper
+        self.agent.player = self
+        self.agent.game = game
         self.game = game
         self.just_eat = False
-        self.score = 0
         self.scores = []
-        self.name = self.agent.name
+        self.name = name
         self.survival_time = 0
         self.death_counter = 0
-        self.game.logs_management(f"agent {self.id} named {self.name} has {self.agent.model.inputs} inputs, {self.agent.model.outputs} outputs, {self.agent.model.intermediary} intermediary, {self.agent.model.number_of_layers} layers, {self.agent.model.dropout} dropout, {self.agent.model.learning_rate} learning rate ")
+        self.game.logs_management(f"agent {self.id} named {self.name} configuration : {self.agent.model.configuration_string}")
         self.do_action(actions.NORTH)
 
     def eat(self):
@@ -78,7 +75,7 @@ class Player(object):
             self.game.spawn_food()
 
         # food vanishing
-        self.food -= 1.0 / FOOD_NUTRITION_VALUE
+        self.food -= 1.0 / self.game.food_nutrition_value
 
         # death
         if self.food <= 0:
@@ -101,7 +98,7 @@ class Player(object):
 
     def respawn(self):
         self.dead = False
-        self.food = FOOD_TO_START
+        self.food = self.game.food_to_start
         self.stones = 0
         self.x = randint(0, self.game.board_width - 1)
         self.y = randint(0, self.game.board_height - 1)

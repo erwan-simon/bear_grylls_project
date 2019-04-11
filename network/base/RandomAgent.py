@@ -2,7 +2,7 @@ import random
 import numpy as np
 
 class MyNetwork():
-    def __init__(self, inputs=50, outputs=4, intermediary=120, learning_rate=0.0005, dropout=0.3, name="random"):
+    def __init__(self, inputs=50, outputs=4, intermediary=0, learning_rate=0, dropout=0, name="random"):
         self.outputs = outputs
         self.inputs = inputs
         self.intermediary = intermediary
@@ -10,6 +10,7 @@ class MyNetwork():
         self.dropout = dropout
         self.number_of_layers = 0
         self.name = name
+        self.configuration_string = "Radom agent"
 
 
     def predict(self, state):
@@ -20,5 +21,5 @@ class MyNetwork():
     def fit(self, state, target):
         pass
 
-    def save_model(self):
+    def save_model(self, path):
         pass

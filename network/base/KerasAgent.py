@@ -39,5 +39,5 @@ class MyNetwork():
     def fit(self, state, target):
         self.model.fit(np.array([state]), np.array([target]), epochs=1, verbose=0)
 
-    def save_model(self):
-        self.model.save_weights('weights.hdf5')
+    def save_model(self, path):
+        self.model.save_weights(path + '/weights.hdf5')

@@ -5,28 +5,31 @@ class Lib:
         pygame.init()
         self.square_size = 15
         pygame.font.init()
-        pygame.display.set_caption('MyGame')
-        self.screen = pygame.display.set_mode((game.board_width * self.square_size, game.board_height * self.square_size))
         self.game = game
+        pygame.display.set_caption(f'Bear Grylls Project: game {self.game.id}')
+        self.screen = pygame.display.set_mode((game.board_width * self.square_size, game.board_height * self.square_size + 10 * self.square_size))
 
     def __del__(self):
         pygame.quit()
 
-    """
     def display_ui(self):
         myfont = pygame.font.SysFont('Segoe UI', 20)
-        myfont_bold = pygame.font.SysFont('Segoe UI', 20, True)
-        text_score = myfont.render('SCORE: ', True, (0, 0, 0))
-
-        text_score_number = myfont.render(str(score), True, (0, 0, 0))
-        text_highest = myfont.render('HIGHEST SCORE: ', True, (0, 0, 0))
-        text_highest_number = myfont_bold.render(str(record), True, (0, 0, 0))
-        self.screen.blit(text_score, (45, 440))
-        self.screen.blit(text_score_number, (120, 440))
-        self.screen.blit(text_highest, (190, 440))
-        self.screen.blit(text_highest_number, (350, 440))
-        self.screen.blit(self.bg, (10, 10))
-    """
+        pygame.draw.rect(self.screen, (0, 0, 0), pygame.Rect(0, self.game.board_height * self.square_size, self.square_size * self.game.board_width, self.square_size))
+        self.screen.blit(myfont.render(f"food to win : {self.game.max_score}", True, (255, 255, 255)), (self.square_size * 3, self.game.board_height * self.square_size))
+        self.screen.blit(myfont.render(f"max turns : {self.game.max_turns}", True, (255, 255, 255)), (self.square_size * 20, self.game.board_height * self.square_size))
+        self.screen.blit(myfont.render(f"current turn index : {len(self.game.players[0].scores)}", True, (255, 255, 255)), (self.square_size * 30, self.game.board_height * self.square_size))
+        y = (2 + self.game.board_height) * self.square_size
+        self.screen.blit(myfont.render(f"player name", True, (0, 0, 0)), (self.square_size * 3, y))
+        self.screen.blit(myfont.render(f"food", True, (0, 0, 0)), (self.square_size * 10, y))
+        self.screen.blit(myfont.render(f"stones", True, (0, 0, 0)), (self.square_size * 20, y))
+        self.screen.blit(myfont.render(f"death count", True, (0, 0, 0)), (self.square_size * 30, y))
+        for player in self.game.players:
+            y = (4 + self.game.players.index(player) * 2 + self.game.board_height) * self.square_size
+            pygame.draw.rect(self.screen, player.color, pygame.Rect(self.square_size, y, self.square_size, self.square_size))
+            self.screen.blit(myfont.render(f"{player.name}", True, (0, 0, 0)), (self.square_size * 3, y))
+            self.screen.blit(myfont.render(f"{str(player.food)[0:4]}", True, (0, 0, 0)), (self.square_size * 10, y))
+            self.screen.blit(myfont.render(f"{player.stones}", True, (0, 0, 0)), (self.square_size * 20, y))
+            self.screen.blit(myfont.render(f"{player.death_counter}", True, (0, 0, 0)), (self.square_size * 30, y))
 
     def display_board(self):
         food_size = 1
@@ -57,11 +60,14 @@ class Lib:
         self.display_player_vision()
         self.display_players()
         self.display_board()
+        self.display_ui()
         # self.display_ui(game)
         pygame.display.update()
+        """
         for player in self.game.players:
             if player.agent.reward != 0:
                 self.game.turn_latency = self.game.highlight_turn_latency
                 break
             self.game.turn_latency = self.game.general_turn_latency
+        """
         pygame.time.wait(self.game.turn_latency)
