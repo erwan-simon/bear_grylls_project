@@ -1,4 +1,5 @@
 import pygame
+from pygame.locals import *
 
 class Lib:
     def __init__(self, game):
@@ -14,22 +15,26 @@ class Lib:
 
     def display_ui(self):
         myfont = pygame.font.SysFont('Segoe UI', 20)
-        pygame.draw.rect(self.screen, (0, 0, 0), pygame.Rect(0, self.game.board_height * self.square_size, self.square_size * self.game.board_width, self.square_size))
+        pygame.draw.rect(self.screen, (0, 0, 0), pygame.Rect(0, self.game.board_height * self.square_size, self.square_size * self.game.board_width, self.square_size * 2))
         self.screen.blit(myfont.render(f"food to win : {self.game.max_score}", True, (255, 255, 255)), (self.square_size * 3, self.game.board_height * self.square_size))
         self.screen.blit(myfont.render(f"max turns : {self.game.max_turns}", True, (255, 255, 255)), (self.square_size * 20, self.game.board_height * self.square_size))
         self.screen.blit(myfont.render(f"current turn index : {len(self.game.players[0].scores)}", True, (255, 255, 255)), (self.square_size * 30, self.game.board_height * self.square_size))
+        self.screen.blit(myfont.render(f"max food on board : {self.game.food_offset}", True, (255, 255, 255)), (self.square_size * 3, (self.game.board_height + 1) * self.square_size))
+        self.screen.blit(myfont.render(f"current turn latency : {self.game.turn_latency}", True, (255, 255, 255)), (self.square_size * 20, (self.game.board_height + 1) * self.square_size))
         y = (2 + self.game.board_height) * self.square_size
         self.screen.blit(myfont.render(f"player name", True, (0, 0, 0)), (self.square_size * 3, y))
         self.screen.blit(myfont.render(f"food", True, (0, 0, 0)), (self.square_size * 10, y))
         self.screen.blit(myfont.render(f"stones", True, (0, 0, 0)), (self.square_size * 20, y))
         self.screen.blit(myfont.render(f"death count", True, (0, 0, 0)), (self.square_size * 30, y))
+        self.screen.blit(myfont.render(f"max score reached", True, (0, 0, 0)), (self.square_size * 40, y))
         for player in self.game.players:
-            y = (4 + self.game.players.index(player) * 2 + self.game.board_height) * self.square_size
+            y = (5 + self.game.players.index(player) * 2 + self.game.board_height) * self.square_size
             pygame.draw.rect(self.screen, player.color, pygame.Rect(self.square_size, y, self.square_size, self.square_size))
             self.screen.blit(myfont.render(f"{player.name}", True, (0, 0, 0)), (self.square_size * 3, y))
             self.screen.blit(myfont.render(f"{str(player.food)[0:4]}", True, (0, 0, 0)), (self.square_size * 10, y))
             self.screen.blit(myfont.render(f"{player.stones}", True, (0, 0, 0)), (self.square_size * 20, y))
             self.screen.blit(myfont.render(f"{player.death_counter}", True, (0, 0, 0)), (self.square_size * 30, y))
+            self.screen.blit(myfont.render(f"{player.max_score_reached}", True, (0, 0, 0)), (self.square_size * 40, y))
 
     def display_board(self):
         food_size = 1
@@ -71,3 +76,18 @@ class Lib:
             self.game.turn_latency = self.game.general_turn_latency
         """
         pygame.time.wait(self.game.turn_latency)
+
+    def get_key(self):
+        pygame.event.pump()
+        key = pygame.key.get_pressed()
+        if key[K_q]:
+            return 'q'
+        if key[K_d]:
+            return 'd'
+        if key[K_f]:
+            return 'f'
+        if key[K_s]:
+            return 's'
+        if key[K_r]:
+            return 'r'
+        return -1

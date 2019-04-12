@@ -7,6 +7,12 @@ mpl.use('TkAgg')
 import matplotlib.pyplot as plt
 import numpy as np
 import os
+import sys
+from game.getch import _Getch
+
+getch = _Getch()
+
+from collections import namedtuple
 
 class Game:
     def __init__(self, id=0,
@@ -26,9 +32,11 @@ class Game:
                  verbose=True,
                  display_plot=False,
                  players=[],
-                 max_turns=10000):
+                 max_turns=10000,
+                 debug=False):
         # settings
         self.id = id
+        self.debug = debug
         self.verbose = verbose
         self.display_plot = display_plot
         self.save_logs = save_logs
@@ -152,7 +160,7 @@ class Game:
             player.respawn()
             self.logs_management(f"current score of {player.name}: {player.scores[-1]} | mean score: {sum(player.scores) / len(player.scores)} for {player.death_counter} death")
             if self.save_models:
-                player.agent.model.save_model(f"./logs/Game_{self.id}/agent_{self.player.name}.pth.tar")
+                player.agent.model.save_model(f"./logs/Game_{self.id}", player.id)
         if self.save_logs:
             f = open(f"./logs/Game_{self.id}/logs.txt", "w+")
             for log in self.logs:
@@ -162,11 +170,48 @@ class Game:
             print(f"Saved logs in {directory}.")
         self.plot_scores()
 
+    def manage_keys(self):
+        if self.lib.get_key() == 'f':
+            print("Type the new max food on board:")
+            try:
+                new_food_offset = int(input())
+            except:
+                print("Please type a valid number [0-...]")
+            if new_food_offset < 0:
+                print("Please type a valid number [0-...]")
+            else:
+                self.food_offset = new_food_offset
+        elif self.lib.get_key() == 's':
+            print("Type the new turn latency:")
+            try:
+                new_turn_latency = int(input())
+            except:
+                print("Please type a valid number [0-...]")
+            if new_turn_latency < 0:
+                print("Please type a valid number [0-...]")
+            else:
+                self.turn_latency = new_turn_latency
+        elif self.lib.get_key() == 'q':
+            print("Are you sure you want to end game ? [y/n]")
+            if input() != "y":
+                return True
+            self.end_game()
+            return False
+        elif self.lib.get_key() == 'd':
+            print("Debug mode activated. You now need to press a key on terminal window to go to next turn (press d on terminal window to disable)")
+            self.debug = True
+        return True
+
     def update(self):
         """
         if len(self.players[0].scores) % 1000 == 0: # every 1000 turns, change situation
             self.current_food_offset = 10 if self.current_food_offset == 5 else 5
         """
+
+        if self.debug:
+            key = getch()
+            if key == 'd':
+                self.debug = False
         # players
         for player in self.players:
             player.update()
@@ -179,7 +224,7 @@ class Game:
         elif hasattr(self, 'lib') is True:
             self.lib = None
 
-        if len(self.players[0].scores) >= self.max_turns:
+        if self.max_turns != -1 and len(self.players[0].scores) >= self.max_turns:
             self.logs_management(f"Max number of turn reached ({self.max_turns} turns). Exiting...")
             self.end_game()
 
@@ -191,7 +236,7 @@ class Game:
                 self.logs_management(f"{player.name} won game {self.id} with {player.food} food harvested in {player.survival_time} turns !")
                 self.end_game()
                 return False
-        return True
+        return self.manage_keys()
 
     def logs_management(self, logs):
         if self.verbose:

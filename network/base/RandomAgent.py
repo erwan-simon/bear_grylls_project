@@ -21,5 +21,5 @@ class MyNetwork():
     def fit(self, state, target):
         pass
 
-    def save_model(self, path):
+    def save_model(self, path, id):
         pass

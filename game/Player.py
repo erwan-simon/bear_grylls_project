@@ -20,6 +20,7 @@ class Player(object):
         self.y = randint(0, game.board_height - 1)
         game.board[self.y][self.x].players.append(self)
         self.food = 1
+        self.max_score_reached = 0
         self.stones = 0
         self.color = colors_combination[id]
         self.dead = False
@@ -65,6 +66,8 @@ class Player(object):
         self.just_eat = False
         self.survival_time += 1
         self.scores.append(self.food)
+        if self.food > self.max_score_reached:
+            self.max_score_reached = self.food
         if self.dead:
             return
 

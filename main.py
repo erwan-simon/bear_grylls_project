@@ -2,6 +2,7 @@
 
 import sys
 import os
+
 from game.Game import Game
 from game.Player import Player
 
@@ -43,14 +44,15 @@ if __name__ == '__main__':
                 max_number_of_stones=12,
                 max_score=250,
                 players=players,
-                food_to_start=1,
+                food_to_start=10,
                 food_nutrition_value=25,
                 save_logs=True,
                 save_models=True,
                 display_plot=True,
-                max_turns=10000)
+                max_turns=-1,
+                debug=False)
     common_memory = []
     # players.append(Player(len(players), game, NetworkWrapper(pytorch(inputs=41, outputs=4)), name="base"))#, model="./logs/Game_1/agent_dropout 0.5.pth.tar")))
     players.append(Player(len(players), game, NetworkWrapper(random(inputs=41, outputs=4)), name="random"))
-    players.append(Player(len(players), game, NetworkWrapperWithHistory(rnn(inputs=41, outputs=4)), name="rnn"))#, model="./logs/Game_1/agent_dropout 0.5.pth.tar")))
+    players.append(Player(len(players), game, NetworkWrapperWithHistory(rnn(inputs=41, outputs=4), history_size=30), name="rnn"))#, model="./logs/Game_1/agent_dropout 0.5.pth.tar")))
     run_game(game)

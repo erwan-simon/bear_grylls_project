@@ -48,5 +48,5 @@ class MyNetwork(nn.Module):
         self.optimizer.step()
         self.eval()
 
-    def save_model(self, path):
-        torch.save(self.state_dict(), f"{path}/agent_{self.name}.pth.tar")
+    def save_model(self, path, id):
+        torch.save(self.state_dict(), f"{path}/agent_{id}.pth.tar")

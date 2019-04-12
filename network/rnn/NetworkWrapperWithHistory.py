@@ -9,7 +9,7 @@ class NetworkWrapper():
         self.player = None
         self.game = None
         len_vision = 41 # hard codded, not pretty but anyway
-        self.memory = [([0 for i in range(len_vision)], [0 for i in range(self.model.outputs)], 0)]
+        self.memory = [[[0 for i in range(len_vision)], [0 for i in range(self.model.outputs)], 0]]
         self.random_moves = 0
         self.total_moves = 0
 
@@ -81,18 +81,29 @@ class NetworkWrapper():
         for i in minibatch_index:
             # target is last action done
             # print(f"array = {self.memory[np.amax([i - self.history_size, 0]):i]} | i = {i} | left = {np.amax([i - self.history_size, 0])} | minibatch = {minibatch_index}")
-            self.model.fit(self.memory[np.amax([i - self.history_size, 0]):i], self.memory[i][1])
+            self.model.fit(self.memory[np.amax([i - self.history_size, 0]):i], np.multiply(self.memory[i][1], self.memory[i][2]))
 
     def train_short_memory(self):
         # target is last action done
-        self.model.fit(self.memory[-self.history_size:-1], self.memory[-1][1])
-
+        if self.memory[-1][2] != 0:
+            self.model.fit(self.memory[-self.history_size:-1], np.multiply(self.memory[-1][1], self.memory[-1][2]))
 
     def remember(self, state, action, reward):
         # action is an int but we want it to be a one hot vector
         one_hot_action = [0 for i in range(self.model.outputs)]
         one_hot_action[action] = 1
-        self.memory.append((state, one_hot_action, reward))
+        """
+        if reward != 0 and len(self.memory) > 1:
+            j = -1
+            relative_reward = reward * (1 - 1 / self.history_size)
+            while j != -1 * len(self.memory) or self.memory[j][2] != 0:
+                self.memory[j][2] = relative_reward
+                relative_reward *= (1 - 1 / self.history_size)
+                j -= 1
+        """
+        self.memory.append([state, one_hot_action, reward])
+        # print("*************************************************")
+        # print(self.memory)
 
     def end_game(self, scores):
         self.save_agent()
