@@ -14,7 +14,7 @@ class MyNetwork():
 
 
     def predict(self, state):
-        result = np.array([0, 0, 0, 0])
+        result = np.array([0 for i in range(self.outputs)])
         result[random.randint(0, self.outputs - 1)] = 1
         return result
 

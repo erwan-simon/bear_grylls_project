@@ -1,0 +1,28 @@
+\contentsline {section}{\numberline {1}Abstract}{2}{section.1}
+\contentsline {paragraph}{•}{2}{section*.2}
+\contentsline {section}{\numberline {2}Introduction}{2}{section.2}
+\contentsline {paragraph}{Reinforcement learning}{2}{section*.3}
+\contentsline {paragraph}{Deep learning}{2}{section*.4}
+\contentsline {paragraph}{The game}{2}{section*.5}
+\contentsline {paragraph}{The general hypothesis}{2}{section*.6}
+\contentsline {section}{\numberline {3}Methods}{3}{section.3}
+\contentsline {subsection}{\numberline {3.1}The game}{3}{subsection.3.1}
+\contentsline {subsubsection}{\numberline {3.1.1}The environment}{3}{subsubsection.3.1.1}
+\contentsline {paragraph}{The board}{3}{section*.7}
+\contentsline {paragraph}{The food}{3}{section*.8}
+\contentsline {paragraph}{Obstacles}{3}{section*.9}
+\contentsline {paragraph}{Stones}{3}{section*.10}
+\contentsline {subsubsection}{\numberline {3.1.2}The agent}{4}{subsubsection.3.1.2}
+\contentsline {paragraph}{•}{4}{section*.11}
+\contentsline {paragraph}{•}{4}{section*.12}
+\contentsline {paragraph}{•}{4}{section*.13}
+\contentsline {paragraph}{•}{4}{section*.14}
+\contentsline {subsection}{\numberline {3.2}The experiment}{4}{subsection.3.2}
+\contentsline {subsubsection}{\numberline {3.2.1}Reinforcement learning}{4}{subsubsection.3.2.1}
+\contentsline {paragraph}{The state}{4}{section*.15}
+\contentsline {paragraph}{The reward}{4}{section*.16}
+\contentsline {paragraph}{The policy}{4}{section*.17}
+\contentsline {paragraph}{•}{5}{section*.18}
+\contentsline {subsubsection}{\numberline {3.2.2}Deep learning}{5}{subsubsection.3.2.2}
+\contentsline {section}{\numberline {4}Results}{5}{section.4}
+\contentsline {section}{\numberline {5}Discussion}{5}{section.5}

@@ -1,0 +1,51 @@
+\begin{thebibliography}{1}
+
+\bibitem{DBLP:journals/corr/MnihKSGAWR13}
+Volodymyr Mnih, Koray Kavukcuoglu, David Silver, Alex Graves, Ioannis
+  Antonoglou, Daan Wierstra, and Martin~A. Riedmiller.
+\newblock Playing atari with deep reinforcement learning.
+\newblock {\em CoRR}, abs/1312.5602, 2013.
+
+\bibitem{healthcare}
+Andre Esteva, Alexandre Robicquet, Bharath Ramsundar, Volodymyr Kuleshov, Mark
+  DePristo, Katherine Chou, Claire Cui, Greg Corrado, Sebastian Thrun, and Jeff
+  Dean.
+\newblock A guide to deep learning in healthcare.
+\newblock {\em Nature Medecine}, 2019.
+
+\bibitem{bakker2002reinforcement}
+Bram Bakker.
+\newblock Reinforcement learning with long short-term memory.
+\newblock In {\em Advances in neural information processing systems}, pages
+  1475--1482, 2002.
+
+\bibitem{sutton1996generalization}
+Richard~S Sutton.
+\newblock Generalization in reinforcement learning: Successful examples using
+  sparse coarse coding.
+\newblock In {\em Advances in neural information processing systems}, pages
+  1038--1044, 1996.
+
+\bibitem{rlblogpost}
+Alex Irpan.
+\newblock Deep reinforcement learning doesn't work yet.
+\newblock \url{https://www.alexirpan.com/2018/02/14/rl-hard.html}, 2018.
+
+\bibitem{wiki:learned_helplessness}
+{Learned Helplessness}.
+\newblock {W}ikipedia{,} the free encyclopedia.
+\newblock \url{https://en.wikipedia.org/wiki/Learned_helplessness}, 2019.
+
+\bibitem{watkins1992q}
+Christopher~JCH Watkins and Peter Dayan.
+\newblock Q-learning.
+\newblock {\em Machine learning}, 8(3-4):279--292, 1992.
+
+\bibitem{tsitsiklis1997analysis}
+John~N Tsitsiklis and Benjamin Van~Roy.
+\newblock Analysis of temporal-diffference learning with function
+  approximation.
+\newblock In {\em Advances in neural information processing systems}, pages
+  1075--1081, 1997.
+
+\end{thebibliography}

@@ -18,23 +18,27 @@ class Lib:
         pygame.draw.rect(self.screen, (0, 0, 0), pygame.Rect(0, self.game.board_height * self.square_size, self.square_size * self.game.board_width, self.square_size * 2))
         self.screen.blit(myfont.render(f"food to win : {self.game.max_score}", True, (255, 255, 255)), (self.square_size * 3, self.game.board_height * self.square_size))
         self.screen.blit(myfont.render(f"max turns : {self.game.max_turns}", True, (255, 255, 255)), (self.square_size * 20, self.game.board_height * self.square_size))
-        self.screen.blit(myfont.render(f"current turn index : {len(self.game.players[0].scores)}", True, (255, 255, 255)), (self.square_size * 30, self.game.board_height * self.square_size))
+        self.screen.blit(myfont.render(f"current turn index : {len(self.game.players[0].food_scores)}", True, (255, 255, 255)), (self.square_size * 30, self.game.board_height * self.square_size))
         self.screen.blit(myfont.render(f"max food on board : {self.game.food_offset}", True, (255, 255, 255)), (self.square_size * 3, (self.game.board_height + 1) * self.square_size))
         self.screen.blit(myfont.render(f"current turn latency : {self.game.turn_latency}", True, (255, 255, 255)), (self.square_size * 20, (self.game.board_height + 1) * self.square_size))
         y = (2 + self.game.board_height) * self.square_size
         self.screen.blit(myfont.render(f"player name", True, (0, 0, 0)), (self.square_size * 3, y))
-        self.screen.blit(myfont.render(f"food", True, (0, 0, 0)), (self.square_size * 10, y))
+        self.screen.blit(myfont.render(f"survival time", True, (0, 0, 0)), (self.square_size * 10, y))
+        self.screen.blit(myfont.render(f"food", True, (0, 0, 0)), (self.square_size * 17, y))
         self.screen.blit(myfont.render(f"stones", True, (0, 0, 0)), (self.square_size * 20, y))
-        self.screen.blit(myfont.render(f"death count", True, (0, 0, 0)), (self.square_size * 30, y))
-        self.screen.blit(myfont.render(f"max score reached", True, (0, 0, 0)), (self.square_size * 40, y))
+        self.screen.blit(myfont.render(f"death count", True, (0, 0, 0)), (self.square_size * 25, y))
+        self.screen.blit(myfont.render(f"max score", True, (0, 0, 0)), (self.square_size * 30, y))
+        self.screen.blit(myfont.render(f"max survival time", True, (0, 0, 0)), (self.square_size * 35, y))
         for player in self.game.players:
             y = (5 + self.game.players.index(player) * 2 + self.game.board_height) * self.square_size
             pygame.draw.rect(self.screen, player.color, pygame.Rect(self.square_size, y, self.square_size, self.square_size))
             self.screen.blit(myfont.render(f"{player.name}", True, (0, 0, 0)), (self.square_size * 3, y))
-            self.screen.blit(myfont.render(f"{str(player.food)[0:4]}", True, (0, 0, 0)), (self.square_size * 10, y))
+            self.screen.blit(myfont.render(f"{player.survival_time}", True, (0, 0, 0)), (self.square_size * 10, y))
+            self.screen.blit(myfont.render(f"{str(player.food)[0:4]}", True, (0, 0, 0)), (self.square_size * 17, y))
             self.screen.blit(myfont.render(f"{player.stones}", True, (0, 0, 0)), (self.square_size * 20, y))
-            self.screen.blit(myfont.render(f"{player.death_counter}", True, (0, 0, 0)), (self.square_size * 30, y))
-            self.screen.blit(myfont.render(f"{player.max_score_reached}", True, (0, 0, 0)), (self.square_size * 40, y))
+            self.screen.blit(myfont.render(f"{len(player.death_counter)}", True, (0, 0, 0)), (self.square_size * 25, y))
+            self.screen.blit(myfont.render(f"{str(player.max_score_reached)[0:4]}", True, (0, 0, 0)), (self.square_size * 30, y))
+            self.screen.blit(myfont.render(f"{player.max_survival_time}", True, (0, 0, 0)), (self.square_size * 35, y))
 
     def display_board(self):
         food_size = 1
@@ -46,6 +50,8 @@ class Lib:
                     pygame.draw.rect(self.screen, (255, 0, 0), pygame.Rect(y * self.square_size, x * self.square_size, self.square_size * food_size, self.square_size * food_size))
                 if (self.game.board[y][x].stone):
                     pygame.draw.rect(self.screen, (0, 0, 0), pygame.Rect(y * self.square_size + stone_offset, x * self.square_size + stone_offset, self.square_size * stone_size, int(self.square_size * stone_size)))
+                if (self.game.board[y][x].trap):
+                    pygame.draw.rect(self.screen, (0, 0, 0), pygame.Rect(y * self.square_size, x * self.square_size, self.square_size * food_size, self.square_size * food_size))
 
     def display_players(self):
         for player in self.game.players:
@@ -90,4 +96,6 @@ class Lib:
             return 's'
         if key[K_r]:
             return 'r'
+        if key[K_p]:
+            return 'p'
         return -1

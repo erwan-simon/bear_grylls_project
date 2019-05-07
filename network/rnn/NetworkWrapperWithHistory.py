@@ -28,10 +28,12 @@ class NetworkWrapper():
     def get_reward(self):
         # self.reward = (math.sqrt(math.pow(self.game.board_width, 2) + math.pow(self.game.board_height, 2)) - self.player.get_distance_closest_food())
         reward = 0
+
+        if self.player.just_eat:
+            reward = 100
+        """
         if self.player.dead:
             reward = -100
-        elif self.player.just_eat:
-            reward = 100
         """
         vision = self.player.take_a_look()
         food_in_vision = False
@@ -41,7 +43,6 @@ class NetworkWrapper():
                 break
         if food_in_vision:
             reward += 1 * (math.sqrt(18) - self.player.get_distance_closest_food())
-        """
         return reward
 
     def request_action(self):
@@ -74,11 +75,17 @@ class NetworkWrapper():
         # print(f'random moves : {100 * float(self.random_moves) / self.total_moves}')
         self.random_moves = 0
         self.total_moves = 0
-        if len(self.memory) > 1000:
-            minibatch_index = random.sample(range(1, len(self.memory)), 1000)
+        pre_minibatch_indexes = []
+        for memory_index in range(len(self.memory)):
+            if (self.memory[memory_index][2] != 0):
+                pre_minibatch_indexes.append(memory_index)
+
+        if len(pre_minibatch_indexes) > 1000:
+            minibatch_indexes = random.sample(pre_minibatch_indexes, 1000)
         else:
-            minibatch_index = range(1, len(self.memory))
-        for i in minibatch_index:
+            minibatch_indexes = pre_minibatch_indexes
+
+        for i in minibatch_indexes:
             # target is last action done
             # print(f"array = {self.memory[np.amax([i - self.history_size, 0]):i]} | i = {i} | left = {np.amax([i - self.history_size, 0])} | minibatch = {minibatch_index}")
             self.model.fit(self.memory[np.amax([i - self.history_size, 0]):i], np.multiply(self.memory[i][1], self.memory[i][2]))
@@ -86,12 +93,13 @@ class NetworkWrapper():
     def train_short_memory(self):
         # target is last action done
         if self.memory[-1][2] != 0:
-            self.model.fit(self.memory[-self.history_size:-1], np.multiply(self.memory[-1][1], self.memory[-1][2]))
+            self.model.fit(self.memory[-self.history_size:-1], np.multiply(self.memory[-1][1], self.memory[-1][2] - self.memory[-2][2]))
 
     def remember(self, state, action, reward):
         # action is an int but we want it to be a one hot vector
         one_hot_action = [0 for i in range(self.model.outputs)]
         one_hot_action[action] = 1
+
         """
         if reward != 0 and len(self.memory) > 1:
             j = -1
