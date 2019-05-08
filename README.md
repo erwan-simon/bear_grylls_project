@@ -56,6 +56,10 @@ The reward give a lot of points if the agent ate food at the present turn and ad
 
 ### Deep Learning networks
 
-#### Tensorflow and Keras ([file](network/Network2.py))
+#### Tensorflow and Keras ([file](network/base/KerasAgent.py))
 
-#### Pytorch ([file](network/Network.py))
+The Keras Agent is not up-to-date anymore. Maybe I will fix it in a near future.
+
+#### Pytorch ([file](network/base/BasePytorch.py))
+
+The Pytorch base agent works well.
