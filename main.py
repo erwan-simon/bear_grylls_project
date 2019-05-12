@@ -58,7 +58,7 @@ if __name__ == '__main__':
                 debug=False,
                 trap_percentage=0.2)
     # inputs = vision_distance^2 + vision_distance * 2 + 2
-    players.append(Player(len(players), game, BaseWrapper(random(inputs=41, outputs=4)), name="random"))
+    # players.append(Player(len(players), game, BaseWrapper(random(inputs=41, outputs=4)), name="random"))
     players.append(Player(len(players), game, ConvolutionWrapper(convolution(inputs=196, outputs=4, learning_rate=0.001)), vision_distance=7, name="0.001"))
-    players.append(Player(len(players), game, ConvolutionWrapper(convolution(inputs=196, outputs=4, learning_rate=0.0001)), vision_distance=7, name="0.0001"))
+    # players.append(Player(len(players), game, ConvolutionWrapper(convolution(inputs=196, outputs=4, learning_rate=0.0001)), vision_distance=7, name="0.0001"))
     run_game(game)

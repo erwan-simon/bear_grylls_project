@@ -1,4 +1,4 @@
-\begin{thebibliography}{1}
+\begin{thebibliography}{10}
 
 \bibitem{DBLP:journals/corr/MnihKSGAWR13}
 Volodymyr Mnih, Koray Kavukcuoglu, David Silver, Alex Graves, Ioannis
@@ -36,16 +36,40 @@ Alex Irpan.
 \newblock {W}ikipedia{,} the free encyclopedia.
 \newblock \url{https://en.wikipedia.org/wiki/Learned_helplessness}, 2019.
 
-\bibitem{watkins1992q}
-Christopher~JCH Watkins and Peter Dayan.
-\newblock Q-learning.
-\newblock {\em Machine learning}, 8(3-4):279--292, 1992.
-
 \bibitem{tsitsiklis1997analysis}
 John~N Tsitsiklis and Benjamin Van~Roy.
 \newblock Analysis of temporal-diffference learning with function
   approximation.
 \newblock In {\em Advances in neural information processing systems}, pages
   1075--1081, 1997.
+
+\bibitem{watkins1992q}
+Christopher~JCH Watkins and Peter Dayan.
+\newblock Q-learning.
+\newblock {\em Machine learning}, 8(3-4):279--292, 1992.
+
+\bibitem{mnih2016asynchronous}
+Volodymyr Mnih, Adria~Puigdomenech Badia, Mehdi Mirza, Alex Graves, Timothy
+  Lillicrap, Tim Harley, David Silver, and Koray Kavukcuoglu.
+\newblock Asynchronous methods for deep reinforcement learning.
+\newblock In {\em International conference on machine learning}, pages
+  1928--1937, 2016.
+
+\bibitem{van2016deep}
+Hado Van~Hasselt, Arthur Guez, and David Silver.
+\newblock Deep reinforcement learning with double q-learning.
+\newblock In {\em Thirtieth AAAI Conference on Artificial Intelligence}, 2016.
+
+\bibitem{hessel2018rainbow}
+Matteo Hessel, Joseph Modayil, Hado Van~Hasselt, Tom Schaul, Georg Ostrovski,
+  Will Dabney, Dan Horgan, Bilal Piot, Mohammad Azar, and David Silver.
+\newblock Rainbow: Combining improvements in deep reinforcement learning.
+\newblock In {\em Thirty-Second AAAI Conference on Artificial Intelligence},
+  2018.
+
+\bibitem{github:bear_grylls_project}
+{Erwan Simon}.
+\newblock Bear grylls project.
+\newblock \url{https://github.com/erwan-simon/bear_grylls_project}, 2019.
 
 \end{thebibliography}

@@ -17,12 +17,26 @@
 \contentsline {paragraph}{•}{4}{section*.12}
 \contentsline {paragraph}{•}{4}{section*.13}
 \contentsline {paragraph}{•}{4}{section*.14}
-\contentsline {subsection}{\numberline {3.2}The experiment}{4}{subsection.3.2}
-\contentsline {subsubsection}{\numberline {3.2.1}Reinforcement learning}{4}{subsubsection.3.2.1}
-\contentsline {paragraph}{The state}{4}{section*.15}
-\contentsline {paragraph}{The reward}{4}{section*.16}
-\contentsline {paragraph}{The policy}{4}{section*.17}
-\contentsline {paragraph}{•}{5}{section*.18}
-\contentsline {subsubsection}{\numberline {3.2.2}Deep learning}{5}{subsubsection.3.2.2}
-\contentsline {section}{\numberline {4}Results}{5}{section.4}
-\contentsline {section}{\numberline {5}Discussion}{5}{section.5}
+\contentsline {subsubsection}{\numberline {3.1.3}The metrics}{5}{subsubsection.3.1.3}
+\contentsline {subsection}{\numberline {3.2}The experiment}{5}{subsection.3.2}
+\contentsline {subsubsection}{\numberline {3.2.1}Reinforcement learning}{5}{subsubsection.3.2.1}
+\contentsline {paragraph}{The state}{5}{section*.15}
+\contentsline {paragraph}{The reward}{5}{section*.16}
+\contentsline {paragraph}{The policy}{5}{section*.17}
+\contentsline {paragraph}{The bias exploitation-exploration}{6}{section*.18}
+\contentsline {paragraph}{•}{6}{section*.19}
+\contentsline {paragraph}{•}{6}{section*.20}
+\contentsline {subsubsection}{\numberline {3.2.2}Deep learning}{6}{subsubsection.3.2.2}
+\contentsline {paragraph}{•}{6}{section*.21}
+\contentsline {paragraph}{•}{6}{section*.22}
+\contentsline {paragraph}{•}{7}{section*.23}
+\contentsline {paragraph}{•}{8}{section*.24}
+\contentsline {section}{\numberline {4}Results}{9}{section.4}
+\contentsline {paragraph}{•}{9}{section*.25}
+\contentsline {paragraph}{•}{9}{section*.26}
+\contentsline {paragraph}{•}{9}{section*.27}
+\contentsline {paragraph}{•}{9}{section*.28}
+\contentsline {section}{\numberline {5}Discussion}{9}{section.5}
+\contentsline {paragraph}{The dimensionnal aspect}{9}{section*.29}
+\contentsline {paragraph}{•}{9}{section*.30}
+\contentsline {paragraph}{•}{10}{section*.31}
